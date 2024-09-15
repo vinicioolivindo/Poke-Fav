@@ -126,10 +126,44 @@ p{
     align-items: center;
     background: var(--color-water);
     border-radius: 2rem;
+    position: relative;
+}
+
+
+.showPokemons .img-container .addToTeam{
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(0, 0, 0, 0.5);
+    padding: .7rem;
+    border-radius: 50%;
+    border: 2px solid white;
+    color: white;
+    cursor: pointer;
 }
 
 .showPokemons .img-container img {
-    height: 9rem;
+    height: 10rem;
+    margin-right: 1rem;
+}
+
+.myTeam ul{
+    display: flex;
+    gap: 1rem;
+    list-style: none;
+    flex-wrap: wrap;
+}
+
+.myTeam ul li {
+    background: #EBF1F8;
+    padding: 1rem 1.5rem 0;
+    border-radius: 1.6rem;
+}
+.myTeam ul li button{
+    display: none;
 }
 
 /* classes */

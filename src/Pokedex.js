@@ -1,13 +1,13 @@
-export class Pokemons{
-  static search(namePokemon){
+export class Pokemons {
+  static search(namePokemon) {
     const endpoint = `https://pokeapi.co/api/v2/pokemon/${namePokemon}`
 
     return fetch(endpoint)
-    .then(pokemon => pokemon.json())
-    .then(data => {
-      const infos = {
+      .then(pokemon => pokemon.json())
+      .then(data => {
+        const infos = {
           id: data.id,
-          name: data.name.split(' ').map(letra => letra[0].toUpperCase()+letra.slice(1)).join(' '),
+          name: data.name.split(' ').map(letra => letra[0].toUpperCase() + letra.slice(1)).join(' '),
           type: data.types.map(typeName => typeName.type.name),
           image: data.sprites.front_default,
         }
@@ -19,17 +19,17 @@ export class Pokemons{
 export class Pokedex {
   constructor(root) {
     this.root = document.querySelector(root);
-    
 
-    this.entries = [];
+
+    this.entrie = {};
     this.myTeam = []
   }
-  async add(namePokemon){
+  async add(namePokemon) {
     const pokemon = await Pokemons.search(namePokemon)
 
-    console.log(pokemon);
-    this.entries = [pokemon,...this.entries]
-    this.update()
+    this.entrie = pokemon;
+    this.showSearch()
+    this.addToTeam()
   }
 }
 
@@ -37,43 +37,48 @@ export class PokedexView extends Pokedex {
   constructor(root) {
     super(root);
     this.lista = this.root.querySelector(".showPokemons ul");
-    
-    this.update();
+
+    this.showSearch();
     this.onSearch();
   }
 
-  onSearch(){
+  onSearch() {
     const btnSearch = this.root.querySelector('#input button')
     btnSearch.onclick = () => {
       const { value } = this.root.querySelector('#search-poke')
-      
-      this.add(value)
+      this.add(value.toLowerCase())
     }
   }
-
-  update() {
-    this.removeAllPokemons();
-    const nonePokemons = this.root.querySelector('.showPokemons ul')
-    if(this.entries.length == 0){
-      nonePokemons.classList.add('noneSearch')
-    }else{
-      nonePokemons.classList.remove('noneSearch')
+  addToTeam() {
+    const btnAdd = this.root.querySelector('.addToTeam')
+    btnAdd.onclick = () => {
+      this.myTeam = [this.entrie, ...this.myTeam]
+      this.showMyTeam()
+      console.log(this.myTeam);
     }
 
-    this.entries.forEach((info) => {
+  }
 
-      const item = this.createPokemon();
+  showMyTeam() {
+    const myTeamList = this.root.querySelector('.myTeam ul')
+    myTeamList.append(this.createPokemon())
+  }
 
-      item.querySelector(".info p").textContent = `Nº00${info.id}`;
-      item.querySelector(".info h3").textContent = `${info.name}`;
-      item.querySelector(".info .type span").textContent = `${info.type}`;
-      item.querySelector(".img-container img").src = `${info.image}`;
+  showSearch() {
+    this.removeAllPokemons();
 
-      this.lista.append(item);
-    });
+    const nonePokemons = this.root.querySelector('.showPokemons ul')
+    if (Object.keys(this.entrie).length === 0) {
+      nonePokemons.classList.add('noneSearch')
+    } else {
+      nonePokemons.classList.remove('noneSearch')
+
+      this.lista.append(this.createPokemon());
+      this.addToTeam()
+    }
   }
   createPokemon() {
-    let item = document.createElement("li");
+    const item = document.createElement("li");
     item.innerHTML = `
             <div class="info">
                 <p></p>
@@ -88,9 +93,15 @@ export class PokedexView extends Pokedex {
                   src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/8.png"
                   alt=""
                 />
+                <button class="addToTeam"><i class="ph-bold ph-heart"></i></button>
             </div>
         `;
-    return item;
+    item.querySelector(".info p").textContent = `Nº${this.entrie.id.toString().padStart(3, '0')}`;
+    item.querySelector(".info h3").textContent = `${this.entrie.name}`;
+    item.querySelector(".info .type span").textContent = `${this.entrie.type}`;
+    item.querySelector(".img-container img").src = `${this.entrie.image}`;
+    return item
+
   }
   removeAllPokemons() {
     this.lista.querySelectorAll("li").forEach((item) => {
