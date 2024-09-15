@@ -40,6 +40,7 @@ export class PokedexView extends Pokedex {
 
     this.showSearch();
     this.onSearch();
+    this.showMyTeam()
   }
 
   onSearch() {
@@ -61,6 +62,11 @@ export class PokedexView extends Pokedex {
 
   showMyTeam() {
     const myTeamList = this.root.querySelector('.myTeam ul')
+    if(this.myTeam.length === 0){
+      myTeamList.classList.add('teamEmpty')
+    }else{
+      myTeamList.classList.remove('teamEmpty')
+    }
     myTeamList.append(this.createPokemon())
   }
 

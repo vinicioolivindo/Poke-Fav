@@ -81,17 +81,12 @@ p{
 }
 
 .showPokemons ul {
-    max-height: 45rem;
-    overflow-y: auto;
     margin-top: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.6rem;
 }
 
 .noneSearch {
     background: #cdcdcd;
-    height: 45rem;
+    height: 10rem;
     border-radius: 2rem;
     position: relative;
     display: flex;
@@ -150,6 +145,14 @@ p{
     margin-right: 1rem;
 }
 
+.myTeam{
+    max-height: 45rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+}
+
 .myTeam ul{
     display: flex;
     gap: 1rem;
@@ -164,6 +167,24 @@ p{
 }
 .myTeam ul li button{
     display: none;
+}
+
+.teamEmpty{
+    background: #cdcdcd;
+    height: 20rem;
+    border-radius: 2rem;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.teamEmpty::before {
+    content: 'Seu time esta vazio:(';
+    font-weight: bold;
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    align-self: center;
 }
 
 /* classes */
