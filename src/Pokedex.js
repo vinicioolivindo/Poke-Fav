@@ -1,20 +1,28 @@
 export class Pokemons {
-  static search(namePokemon) {
-    const endpoint = `https://pokeapi.co/api/v2/pokemon/${namePokemon}`
+  static async search(namePokemon) {
+    const endpoint = `https://pokeapi.co/api/v2/pokemon/${namePokemon}`;
 
-    return fetch(endpoint)
-      .then(pokemon => pokemon.json())
-      .then(data => {
-        const infos = {
-          id: data.id,
-          name: data.name.split(' ').map(letra => letra[0].toUpperCase() + letra.slice(1)).join(' '),
-          type: data.types.map(typeName => typeName.type.name),
-          image: data.sprites.front_default,
-        }
-        return infos
-      })
+    try {
+      const response = await fetch(endpoint);
+      if (!response.ok) {
+        throw new Error('Pokémon não encontrado');
+      }
+
+      const data = await response.json();
+      const infos = {
+        id: data.id,
+        name: data.name.split(' ').map(letra => letra[0].toUpperCase() + letra.slice(1)).join(' '),
+        type: data.types.map(typeName => typeName.type.name),
+        image: data.sprites.front_default,
+      };
+      return infos;
+    } catch (error) {
+      console.error(error.message);
+      return null;  // Retorna null se o Pokémon não for encontrado ou se ocorrer um erro
+    }
   }
 }
+
 
 export class Pokedex {
   constructor(root) {
@@ -26,7 +34,9 @@ export class Pokedex {
   async add(namePokemon) {
     const pokemon = await Pokemons.search(namePokemon)
 
-
+    if (pokemon === null) {
+      alert('Pokemon nao encontrado, verifique o nome')
+    }
     this.entrie = pokemon;
     this.showSearch()
     this.addToTeam()
@@ -105,10 +115,10 @@ export class PokedexView extends Pokedex {
     item.querySelector(".info p").textContent = `Nº${this.entrie.id.toString().padStart(3, '0')}`;
     item.querySelector(".info h3").textContent = `${this.entrie.name}`;
     this.entrie.type.forEach(tp => {
-        const spanType = document.createElement('span');
-        spanType.textContent = tp;
-        spanType.classList.add(tp); // Adiciona a classe correspondente ao tipo
-        item.querySelector('.info .type').append(spanType);
+      const spanType = document.createElement('span');
+      spanType.textContent = tp;
+      spanType.classList.add(tp); // Adiciona a classe correspondente ao tipo
+      item.querySelector('.info .type').append(spanType);
     });
     item.querySelector(".img-container img").src = `${this.entrie.image}`;
     this.toogleType(item)
@@ -121,88 +131,77 @@ export class PokedexView extends Pokedex {
     });
   }
   toogleType(item) {
-    const type = item.querySelectorAll('.info .type span')
-    console.log(type);
+    const types = item.querySelectorAll('.info .type span');
+    const bg = item.querySelector('.img-container');
+    let colorBg = '';  // Variável para armazenar a cor de fundo
 
-    const colorBg = item.querySelector('.img-container')
-    type.forEach(tp => {
-      switch (true) {
-        case tp.classList.contains('fire'):
-          colorBg.style.backgroundColor = 'red';
-          tp.style.backgroundColor = 'red';
+    const firstType = types[0].classList[0];
+      switch (firstType) {
+        case 'fire':
+          colorBg = 'red';
           break;
-        case tp.classList.contains('water'):
-          colorBg.style.backgroundColor = 'blue';
-          tp.style.backgroundColor = 'blue';
+        case 'water':
+          colorBg = 'blue';
           break;
-        case tp.classList.contains('grass'):
-          colorBg.style.backgroundColor = 'green';
-          tp.style.backgroundColor = 'green';
+        case 'grass':
+          colorBg = 'green';
           break;
-        case tp.classList.contains('electric'):
-          colorBg.style.backgroundColor = 'yellow';
-          tp.style.backgroundColor = 'yellow';
-          tp.style.color = 'black';  // Para que o texto fique visível
+        case 'electric':
+          colorBg = 'yellow';
           break;
-        case tp.classList.contains('ice'):
-          colorBg.style.backgroundColor = 'lightblue';
-          tp.style.backgroundColor = 'lightblue';
+        case 'ice':
+          colorBg = 'lightblue';
           break;
-        case tp.classList.contains('fighting'):
-          colorBg.style.backgroundColor = 'brown';
-          tp.style.backgroundColor = 'brown';
+        case 'fighting':
+          colorBg = 'brown';
           break;
-        case tp.classList.contains('poison'):
-          colorBg.style.backgroundColor = 'purple';
-          tp.style.backgroundColor = 'purple';
+        case 'poison':
+          colorBg = 'purple';
           break;
-        case tp.classList.contains('ground'):
-          colorBg.style.backgroundColor = 'sandybrown';
-          tp.style.backgroundColor = 'sandybrown';
+        case 'ground':
+          colorBg = 'sandybrown';
           break;
-        case tp.classList.contains('flying'):
-          colorBg.style.backgroundColor = 'skyblue';
-          tp.style.backgroundColor = 'skyblue';
+        case 'flying':
+          colorBg = 'skyblue';
           break;
-        case tp.classList.contains('psychic'):
-          colorBg.style.backgroundColor = 'pink';
-          tp.style.backgroundColor = 'pink';
+        case 'psychic':
+          colorBg = 'pink';
           break;
-        case tp.classList.contains('bug'):
-          colorBg.style.backgroundColor = 'olive';
-          tp.style.backgroundColor = 'olive';
+        case 'bug':
+          colorBg = 'olive';
           break;
-        case tp.classList.contains('rock'):
-          colorBg.style.backgroundColor = 'gray';
-          tp.style.backgroundColor = 'gray';
+        case 'rock':
+          colorBg = 'gray';
           break;
-        case tp.classList.contains('ghost'):
-          colorBg.style.backgroundColor = 'indigo';
-          tp.style.backgroundColor = 'indigo';
+        case 'ghost':
+          colorBg = 'indigo';
           break;
-        case tp.classList.contains('dragon'):
-          colorBg.style.backgroundColor = 'darkslateblue';
-          tp.style.backgroundColor = 'darkslateblue';
+        case 'dragon':
+          colorBg = 'darkslateblue';
           break;
-        case tp.classList.contains('dark'):
-          colorBg.style.backgroundColor = 'black';
-          tp.style.backgroundColor = 'black';
-          tp.style.color = 'white';  // Para que o texto fique visível
+        case 'dark':
+          colorBg = 'black';
           break;
-        case tp.classList.contains('steel'):
-          colorBg.style.backgroundColor = 'lightgray';
-          tp.style.backgroundColor = 'lightgray';
+        case 'steel':
+          colorBg = 'lightgray';
           break;
-        case tp.classList.contains('fairy'):
-          colorBg.style.backgroundColor = 'lightpink';
-          tp.style.backgroundColor = 'lightpink';
+        case 'fairy':
+          colorBg = 'lightpink';
           break;
         default:
-          colorBg.style.backgroundColor = '';
-          tp.style.backgroundColor = '';
+          colorBg = ''; // Cor padrão se nenhum tipo for encontrado
           break;
-      }tp
-    })
-    
+      }
+
+      // Aplica a cor de fundo ao img-container
+      bg.style.backgroundColor = colorBg;
+
+    // Ajusta a cor de fundo para todos os tipos
+    types.forEach(tp => {
+      tp.style.backgroundColor = colorBg;
+      if (firstType === 'electric') {
+        tp.style.color = 'black';  // Ajuste especial para o tipo 'dark'
+      }
+    });
   }
 }
