@@ -119,7 +119,7 @@ p{
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0);
+    background-color: transparent;
     border-radius: 2rem;
     position: relative;
 }
@@ -167,6 +167,9 @@ p{
 }
 .myTeam ul li button{
     display: none;
+}
+.myTeam .img-container{
+    background: none;
 }
 
 .teamEmpty{

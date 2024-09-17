@@ -23,23 +23,35 @@ export class Pokemons {
   }
 }
 
-
 export class Pokedex {
   constructor(root) {
     this.root = document.querySelector(root);
 
     this.entrie = {};
-    this.myTeam = []
+    this.myTeam = [];
+    this.load();
   }
+
+  load() {
+    const storedEntries = JSON.parse(localStorage.getItem('@pokemons-myTeam:'));
+    this.myTeam = Array.isArray(storedEntries) ? storedEntries : [];
+  }
+
+  save() {
+    localStorage.setItem('@pokemons-myTeam:', JSON.stringify(this.myTeam));
+  }
+
   async add(namePokemon) {
-    const pokemon = await Pokemons.search(namePokemon)
+    const pokemon = await Pokemons.search(namePokemon);
 
     if (pokemon === null) {
-      alert('Pokemon nao encontrado, verifique o nome')
+      alert('Pokémon não encontrado, verifique o nome');
+      return;
     }
+
     this.entrie = pokemon;
-    this.showSearch()
-    this.addToTeam()
+    this.showSearch();
+    this.addToTeam();
   }
 }
 
@@ -50,158 +62,154 @@ export class PokedexView extends Pokedex {
 
     this.showSearch();
     this.onSearch();
-    this.showMyTeam()
+    this.showMyTeam(); // Mostrar os Pokémon salvos quando a página é carregada
   }
 
   onSearch() {
-    const btnSearch = this.root.querySelector('#input button')
+    const btnSearch = this.root.querySelector('#input button');
     btnSearch.onclick = () => {
-      const { value } = this.root.querySelector('#search-poke')
-      this.add(value.toLowerCase())
-    }
+      const { value } = this.root.querySelector('#search-poke');
+      this.add(value.toLowerCase());
+    };
   }
-  addToTeam() {
-    const btnAdd = this.root.querySelector('.addToTeam')
-    btnAdd.onclick = () => {
-      this.myTeam = [this.entrie, ...this.myTeam]
-      this.showMyTeam()
-      console.log(this.myTeam);
-    }
 
+  addToTeam() {
+    const btnAdd = this.root.querySelector('.addToTeam');
+    btnAdd.onclick = () => {
+      try{
+        const pokemonExistInTeam = this.myTeam.find(pokemon => pokemon.name === this.entrie.name)
+        if(pokemonExistInTeam){
+          throw new Error('Este Pokemon ja esta em seu time')
+        }
+        this.myTeam = [this.entrie, ...this.myTeam];
+        this.showMyTeam();
+        this.save();
+      } catch(error){
+        alert(error.message)
+      }
+    };
   }
 
   showMyTeam() {
-    const myTeamList = this.root.querySelector('.myTeam ul')
+    const myTeamList = this.root.querySelector('.myTeam ul');
+    myTeamList.innerHTML = ''; // Limpar a lista antes de adicionar
+
     if (this.myTeam.length === 0) {
-      myTeamList.classList.add('teamEmpty')
+      myTeamList.classList.add('teamEmpty');
     } else {
-      myTeamList.classList.remove('teamEmpty')
+      myTeamList.classList.remove('teamEmpty');
     }
-    const pokemonAddToTeam = this.createPokemon()
-    pokemonAddToTeam.querySelector('.img-container').style.background = 'none'
-    myTeamList.append(pokemonAddToTeam)
+
+    this.myTeam.forEach(pokemon => {
+      const item = this.createPokemonFromData(pokemon);
+      myTeamList.append(item);
+      item.querySelector('.img-container').style.background = 'none'
+    });
   }
 
   showSearch() {
     this.removeAllPokemons();
 
-    const nonePokemons = this.root.querySelector('.showPokemons ul')
+    const nonePokemons = this.root.querySelector('.showPokemons ul');
     if (Object.keys(this.entrie).length === 0) {
-      nonePokemons.classList.add('noneSearch')
+      nonePokemons.classList.add('noneSearch');
     } else {
-      nonePokemons.classList.remove('noneSearch')
+      nonePokemons.classList.remove('noneSearch');
 
       this.lista.append(this.createPokemon());
-      this.addToTeam()
+      this.addToTeam();
     }
   }
+
   createPokemon() {
     const item = document.createElement("li");
     item.innerHTML = `
             <div class="info">
                 <p></p>
                 <h3></h3>
-                <div class="type ">
-                </div>
+                <div class="type "></div>
             </div>
             <div class="img-container">
-                <img
-                  src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/8.png"
-                  alt=""
-                />
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/8.png" alt="" />
                 <button class="addToTeam"><i class="ph-bold ph-heart"></i></button>
             </div>
         `;
     item.querySelector(".info p").textContent = `Nº${this.entrie.id.toString().padStart(3, '0')}`;
     item.querySelector(".info h3").textContent = `${this.entrie.name}`;
+
     this.entrie.type.forEach(tp => {
       const spanType = document.createElement('span');
       spanType.textContent = tp;
-      spanType.classList.add(tp); // Adiciona a classe correspondente ao tipo
+      spanType.classList.add(tp);
       item.querySelector('.info .type').append(spanType);
     });
     item.querySelector(".img-container img").src = `${this.entrie.image}`;
-    this.toogleType(item)
-    return item
-
+    this.toogleType(item);
+    return item;
   }
+
+  createPokemonFromData(pokemon) {
+    const item = document.createElement("li");
+    item.innerHTML = `
+            <div class="info">
+                <p>Nº${pokemon.id.toString().padStart(3, '0')}</p>
+                <h3>${pokemon.name}</h3>
+                <div class="type "></div>
+            </div>
+            <div class="img-container">
+                <img src="${pokemon.image}" alt="" />
+            </div>
+        `;
+    pokemon.type.forEach(tp => {
+      const spanType = document.createElement('span');
+      spanType.textContent = tp;
+      spanType.classList.add(tp);
+      item.querySelector('.info .type').append(spanType);
+    });
+    this.toogleType(item);
+    return item;
+  }
+
   removeAllPokemons() {
     this.lista.querySelectorAll("li").forEach((item) => {
       item.remove();
     });
   }
+
   toogleType(item) {
     const types = item.querySelectorAll('.info .type span');
     const bg = item.querySelector('.img-container');
-    let colorBg = '';  // Variável para armazenar a cor de fundo
 
-    const firstType = types[0].classList[0];
-      switch (firstType) {
-        case 'fire':
-          colorBg = 'red';
-          break;
-        case 'water':
-          colorBg = 'blue';
-          break;
-        case 'grass':
-          colorBg = 'green';
-          break;
-        case 'electric':
-          colorBg = 'yellow';
-          break;
-        case 'ice':
-          colorBg = 'lightblue';
-          break;
-        case 'fighting':
-          colorBg = 'brown';
-          break;
-        case 'poison':
-          colorBg = 'purple';
-          break;
-        case 'ground':
-          colorBg = 'sandybrown';
-          break;
-        case 'flying':
-          colorBg = 'skyblue';
-          break;
-        case 'psychic':
-          colorBg = 'pink';
-          break;
-        case 'bug':
-          colorBg = 'olive';
-          break;
-        case 'rock':
-          colorBg = 'gray';
-          break;
-        case 'ghost':
-          colorBg = 'indigo';
-          break;
-        case 'dragon':
-          colorBg = 'darkslateblue';
-          break;
-        case 'dark':
-          colorBg = 'black';
-          break;
-        case 'steel':
-          colorBg = 'lightgray';
-          break;
-        case 'fairy':
-          colorBg = 'lightpink';
-          break;
-        default:
-          colorBg = ''; // Cor padrão se nenhum tipo for encontrado
-          break;
-      }
+    const typeColors = {
+      fire: 'red',
+      water: 'blue',
+      grass: 'green',
+      electric: 'yellow',
+      ice: 'lightblue',
+      fighting: 'brown',
+      poison: 'purple',
+      ground: 'sandybrown',
+      flying: 'skyblue',
+      psychic: 'pink',
+      bug: 'olive',
+      rock: 'gray',
+      ghost: 'indigo',
+      dragon: 'darkslateblue',
+      dark: 'black',
+      steel: 'lightgray',
+      fairy: 'lightpink'
+    };
 
-      // Aplica a cor de fundo ao img-container
-      bg.style.backgroundColor = colorBg;
+    if (types.length > 0) {
+      const firstType = types[0].classList[0];
+      bg.style.backgroundColor = typeColors[firstType] || '';
+    }
 
-    // Ajusta a cor de fundo para todos os tipos
     types.forEach(tp => {
-      tp.style.backgroundColor = colorBg;
-      if (firstType === 'electric') {
-        tp.style.color = 'black';  // Ajuste especial para o tipo 'dark'
-      }
+      const type = tp.classList[0];
+      tp.style.backgroundColor = typeColors[type] || '';
+      if (type === 'electric') tp.style.color = 'black';
+      if (type === 'dark') tp.style.color = 'white';
     });
   }
 }
