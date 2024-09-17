@@ -25,7 +25,7 @@
 
 #app {
     margin: 0 auto;
-    max-width: 50rem;
+    max-width: 53rem;
     font: normal 1.6rem "Arial", sans-serif;
     padding: 2rem
 }
@@ -139,6 +139,13 @@ p{
     color: white;
     cursor: pointer;
 }
+.showPokemons .img-container .addToTeam i{
+    transition: all .5s ease;
+}
+
+.showPokemons .img-container .addToTeam:hover i{
+    scale: 1.2;
+}
 
 .showPokemons .img-container img {
     height: 10rem;
@@ -155,21 +162,41 @@ p{
 
 .myTeam ul{
     display: flex;
-    gap: 1rem;
+    gap: 1.5rem;
     list-style: none;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .myTeam ul li {
     background: #EBF1F8;
     padding: 1rem 1.5rem 0;
     border-radius: 1.6rem;
+    position: relative;
 }
-.myTeam ul li button{
-    display: none;
+
+.myTeam ul li .img-container img{
+    filter: drop-shadow(5px 5px 5px #22222260);
 }
-.myTeam .img-container{
-    background: none;
+
+.myTeam ul li .img-container .removePokemon{
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: .7rem;
+    right: .7rem;
+    background: #CD3131;
+    padding: .5rem;
+    border-radius: 50%;
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: all .5s ease;
+}
+.myTeam ul li .img-container .removePokemon:hover{
+    background: #a52323;
+
 }
 
 .teamEmpty{

@@ -53,6 +53,14 @@ export class Pokedex {
     this.showSearch();
     this.addToTeam();
   }
+
+  remove(pokemon){
+    const filteredPokemons = this.myTeam
+    .filter(poke => poke.name !== pokemon.name)
+
+    this.myTeam = filteredPokemons
+
+  }
 }
 
 export class PokedexView extends Pokedex {
@@ -62,7 +70,7 @@ export class PokedexView extends Pokedex {
 
     this.showSearch();
     this.onSearch();
-    this.showMyTeam(); // Mostrar os Pokémon salvos quando a página é carregada
+    this.showMyTeam();
   }
 
   onSearch() {
@@ -81,7 +89,7 @@ export class PokedexView extends Pokedex {
         if(pokemonExistInTeam){
           throw new Error('Este Pokemon ja esta em seu time')
         }
-        this.myTeam = [this.entrie, ...this.myTeam];
+        this.myTeam = [ ...this.myTeam, this.entrie];
         this.showMyTeam();
         this.save();
       } catch(error){
@@ -93,19 +101,31 @@ export class PokedexView extends Pokedex {
   showMyTeam() {
     const myTeamList = this.root.querySelector('.myTeam ul');
     myTeamList.innerHTML = ''; // Limpar a lista antes de adicionar
-
+  
     if (this.myTeam.length === 0) {
       myTeamList.classList.add('teamEmpty');
     } else {
       myTeamList.classList.remove('teamEmpty');
     }
-
+  
     this.myTeam.forEach(pokemon => {
       const item = this.createPokemonFromData(pokemon);
       myTeamList.append(item);
-      item.querySelector('.img-container').style.background = 'none'
+  
+      // Adicionar evento de clique para remover o Pokémon
+      item.querySelector('.removePokemon').onclick = () => {
+        const isOk = confirm('Deseja mesmo remover este pokemon?')
+        if (isOk){
+          this.remove(pokemon);
+          this.save(); // Salva o time atualizado
+          this.showMyTeam(); // Atualiza a interface após remover
+        }
+      };
+  
+      item.querySelector('.img-container').style.background = 'none';
     });
   }
+  
 
   showSearch() {
     this.removeAllPokemons();
@@ -136,7 +156,6 @@ export class PokedexView extends Pokedex {
         `;
     item.querySelector(".info p").textContent = `Nº${this.entrie.id.toString().padStart(3, '0')}`;
     item.querySelector(".info h3").textContent = `${this.entrie.name}`;
-
     this.entrie.type.forEach(tp => {
       const spanType = document.createElement('span');
       spanType.textContent = tp;
@@ -144,6 +163,7 @@ export class PokedexView extends Pokedex {
       item.querySelector('.info .type').append(spanType);
     });
     item.querySelector(".img-container img").src = `${this.entrie.image}`;
+    item.querySelector(".img-container img").alt = `imagem do pokemon ${this.entrie.name}`;
     this.toogleType(item);
     return item;
   }
@@ -157,7 +177,8 @@ export class PokedexView extends Pokedex {
                 <div class="type "></div>
             </div>
             <div class="img-container">
-                <img src="${pokemon.image}" alt="" />
+                <img src="${pokemon.image}" alt="imagem do pokemon ${pokemon.name}" />
+                <button class="removePokemon"><i class="ph-bold ph-x"></i></button>
             </div>
         `;
     pokemon.type.forEach(tp => {
